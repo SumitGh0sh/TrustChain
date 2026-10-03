@@ -12,6 +12,7 @@ const {
   logout,
 } = require('../controllers/auth.controller');
 const authenticate = require('../middleware/auth');
+const { uploadKybDocs } = require('../middleware/upload');
 const validate = require('../middleware/validate');
 const { authLimiter } = require('../middleware/rateLimit');
 const {
@@ -48,8 +49,8 @@ router.post('/consumer/login', authLimiter, validate(consumerLoginSchema), consu
 // =============================================================================
 
 // Business signup per role
-router.post('/signup', validate(businessSignupSchema), businessSignup);
-router.post('/register', validate(businessSignupSchema), businessSignup); // Alias
+router.post('/signup', uploadKybDocs.array('documents', 5), validate(businessSignupSchema), businessSignup);
+router.post('/register', uploadKybDocs.array('documents', 5), validate(businessSignupSchema), businessSignup); // Alias
 
 // Business login per role
 router.post('/login', validate(businessLoginSchema), businessLogin);

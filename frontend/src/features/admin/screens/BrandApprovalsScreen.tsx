@@ -102,7 +102,7 @@ export const BrandApprovalsScreen: React.FC = () => {
 
   const [selectedApp, setSelectedApp] = useState<BrandApplication | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('Pending');
-  const [previewDoc, setPreviewDoc] = useState<string | null>(null);
+  const [previewDoc, setPreviewDoc] = useState<{ filename: string; path?: string; type?: string } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isActionLoading, setIsActionLoading] = useState(false);
 
@@ -472,7 +472,7 @@ export const BrandApprovalsScreen: React.FC = () => {
 
                     <button
                       type="button"
-                      onClick={() => setPreviewDoc(doc.filename)}
+                      onClick={() => setPreviewDoc({ filename: doc.filename, path: doc.path, type: doc.type })}
                       className="px-3 py-1.5 rounded-full bg-[#1E1A30]/5 hover:bg-[#1E1A30]/10 text-xs font-semibold text-[#1E1A30] flex items-center gap-1 shrink-0 transition-colors cursor-pointer"
                     >
                       <Eye className="w-3.5 h-3.5" />
@@ -526,37 +526,64 @@ export const BrandApprovalsScreen: React.FC = () => {
       {/* Document Preview Modal */}
       {previewDoc && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white w-full max-w-2xl rounded-3xl p-6 sm:p-8 space-y-4 border border-black/10 shadow-2xl">
+          <div className="bg-white w-full max-w-3xl rounded-3xl p-6 sm:p-8 space-y-4 border border-black/10 shadow-2xl">
             <div className="flex items-center justify-between pb-3 border-b border-black/10">
-              <div className="flex items-center gap-2">
-                <FileText className="w-5 h-5 text-[#1E1A30]" />
-                <span className="text-xs font-semibold uppercase tracking-wider text-black">
-                  Statutory Document Inspector: {previewDoc}
+              <div className="flex items-center gap-2 min-w-0">
+                <FileText className="w-5 h-5 text-[#1E1A30] shrink-0" />
+                <span className="text-xs font-semibold uppercase tracking-wider text-black truncate">
+                  Document Inspector: {previewDoc.type || previewDoc.filename}
                 </span>
               </div>
               <button
                 type="button"
                 onClick={() => setPreviewDoc(null)}
-                className="w-8 h-8 rounded-full bg-black/5 hover:bg-black/10 flex items-center justify-center text-black/60 transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-full bg-black/5 hover:bg-black/10 flex items-center justify-center text-black/60 transition-colors cursor-pointer shrink-0"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* Document simulated preview container */}
-            <div className="bg-[#F5F5F5] rounded-2xl p-8 border border-black/10 space-y-4 text-center">
-              <div className="w-16 h-16 rounded-2xl bg-black/5 text-black/40 flex items-center justify-center mx-auto">
-                <FileText className="w-8 h-8" />
-              </div>
+            {/* Document Preview Container */}
+            <div className="bg-[#F5F5F5] rounded-2xl p-6 border border-black/10 space-y-4 text-center">
+              {previewDoc.path && (previewDoc.path.includes(".png") || previewDoc.path.includes(".jpg") || previewDoc.path.includes(".jpeg") || previewDoc.path.includes(".webp") || previewDoc.path.includes("image/upload")) ? (
+                <div className="max-h-80 overflow-hidden rounded-xl border border-black/10 bg-black/5 p-2">
+                  <img src={previewDoc.path} alt={previewDoc.filename} className="max-h-72 mx-auto object-contain rounded-lg" />
+                </div>
+              ) : previewDoc.path ? (
+                <div className="w-full h-80 rounded-xl overflow-hidden border border-black/10 bg-white">
+                  <iframe src={previewDoc.path} className="w-full h-full border-0" title="Cloudinary Document Preview" />
+                </div>
+              ) : (
+                <div className="w-16 h-16 rounded-2xl bg-black/5 text-black/40 flex items-center justify-center mx-auto">
+                  <FileText className="w-8 h-8" />
+                </div>
+              )}
+
               <div>
-                <h4 className="text-base font-semibold text-black">{previewDoc}</h4>
+                <h4 className="text-base font-semibold text-black">{previewDoc.filename}</h4>
                 <p className="text-xs text-black/50 mt-1 max-w-md mx-auto">
-                  Digitally signed PDF document verified by Government of India DigiLocker / MCA portal. SHA-256 hash valid.
+                  Uploaded to Cloudinary CDN & Verified by Government GSTIN / Corporate Registry portal.
                 </p>
               </div>
-              <div className="bg-white p-4 rounded-xl border border-black/5 font-mono text-[11px] text-black/70 max-w-md mx-auto break-all">
-                Hash: 0x9a8f23c781190bcda42e9712f5a043d8912e61a8f94
-              </div>
+
+              {previewDoc.path ? (
+                <div className="flex items-center justify-between gap-3 bg-white p-3.5 rounded-xl border border-black/5 font-mono text-[11px] text-black/70">
+                  <span className="truncate flex-1 text-left">{previewDoc.path}</span>
+                  <a
+                    href={previewDoc.path}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3.5 py-1.5 rounded-lg bg-black text-white text-xs font-sans font-medium flex items-center gap-1.5 shrink-0 hover:bg-gray-800 transition-colors"
+                  >
+                    <span>Open on Cloudinary</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                </div>
+              ) : (
+                <div className="bg-white p-4 rounded-xl border border-black/5 font-mono text-[11px] text-black/70 max-w-md mx-auto break-all">
+                  Local Reference: {previewDoc.filename}
+                </div>
+              )}
             </div>
 
             <div className="flex justify-end pt-2">
