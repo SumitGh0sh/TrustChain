@@ -138,6 +138,7 @@ export const BrandApprovalsScreen: React.FC = () => {
           const docs = (b.documents || []).map((d: any) => ({
             type: d.documentType || 'Statutory Filing',
             filename: d.originalName || d.filename || 'Document.pdf',
+            path: d.path || d.url || null,
             verified: true,
           }));
 
@@ -531,7 +532,7 @@ export const BrandApprovalsScreen: React.FC = () => {
               <div className="flex items-center gap-2 min-w-0">
                 <FileText className="w-5 h-5 text-[#1E1A30] shrink-0" />
                 <span className="text-xs font-semibold uppercase tracking-wider text-black truncate">
-                  Document Inspector: {previewDoc.type || previewDoc.filename}
+                  Statutory Document Inspector: {previewDoc.type || previewDoc.filename}
                 </span>
               </div>
               <button
@@ -545,17 +546,27 @@ export const BrandApprovalsScreen: React.FC = () => {
 
             {/* Document Preview Container */}
             <div className="bg-[#F5F5F5] rounded-2xl p-6 border border-black/10 space-y-4 text-center">
-              {previewDoc.path && (previewDoc.path.includes(".png") || previewDoc.path.includes(".jpg") || previewDoc.path.includes(".jpeg") || previewDoc.path.includes(".webp") || previewDoc.path.includes("image/upload")) ? (
-                <div className="max-h-80 overflow-hidden rounded-xl border border-black/10 bg-black/5 p-2">
-                  <img src={previewDoc.path} alt={previewDoc.filename} className="max-h-72 mx-auto object-contain rounded-lg" />
-                </div>
-              ) : previewDoc.path ? (
-                <div className="w-full h-80 rounded-xl overflow-hidden border border-black/10 bg-white">
-                  <iframe src={previewDoc.path} className="w-full h-full border-0" title="Cloudinary Document Preview" />
+              {previewDoc.path ? (
+                <div className="max-h-96 overflow-auto rounded-2xl border border-black/10 bg-black/5 p-3 flex items-center justify-center">
+                  {previewDoc.path.includes(".png") || previewDoc.path.includes(".jpg") || previewDoc.path.includes(".jpeg") || previewDoc.path.includes(".webp") || previewDoc.path.includes("image/upload") || previewDoc.filename?.toLowerCase().match(/\.(jpg|jpeg|png|webp)$/) ? (
+                    <img
+                      src={previewDoc.path}
+                      alt={previewDoc.filename}
+                      className="max-h-80 w-auto object-contain rounded-xl shadow-md border border-black/10 bg-white p-1"
+                    />
+                  ) : (
+                    <iframe src={previewDoc.path} className="w-full h-80 rounded-xl border border-black/10 bg-white" title="Cloudinary Document Preview" />
+                  )}
                 </div>
               ) : (
-                <div className="w-16 h-16 rounded-2xl bg-black/5 text-black/40 flex items-center justify-center mx-auto">
-                  <FileText className="w-8 h-8" />
+                <div className="py-8 text-center space-y-3 bg-white rounded-2xl border border-black/10 p-6">
+                  <FileText className="w-12 h-12 mx-auto text-black/30" />
+                  <div>
+                    <h4 className="text-sm font-semibold text-black">{previewDoc.filename}</h4>
+                    <p className="text-xs text-black/50 mt-1 max-w-md mx-auto">
+                      Statutory document file reference attached by manufacturer.
+                    </p>
+                  </div>
                 </div>
               )}
 
@@ -579,11 +590,7 @@ export const BrandApprovalsScreen: React.FC = () => {
                     <ExternalLink className="w-3.5 h-3.5" />
                   </a>
                 </div>
-              ) : (
-                <div className="bg-white p-4 rounded-xl border border-black/5 font-mono text-[11px] text-black/70 max-w-md mx-auto break-all">
-                  Local Reference: {previewDoc.filename}
-                </div>
-              )}
+              ) : null}
             </div>
 
             <div className="flex justify-end pt-2">
