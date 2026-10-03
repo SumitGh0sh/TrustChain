@@ -39,6 +39,8 @@ const formatUserResponse = (user) => ({
   companyName: user.companyName || null,
   creditBalance: user.creditBalance,
   pointsBalance: user.pointsBalance,
+  brandStatus: user.brandStatus || 'none',
+  walletAddress: user.walletAddress || null,
   isVerified: user.isVerified,
   createdAt: user.createdAt,
 });

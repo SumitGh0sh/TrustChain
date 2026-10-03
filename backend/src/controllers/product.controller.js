@@ -35,7 +35,7 @@ const createProduct = async (req, res, next) => {
     if (req.files && req.files.length > 0) {
       req.files.forEach((file, index) => {
         images.push({
-          url: `/uploads/products/${file.filename}`,
+          url: file.path || file.secure_url,
           filename: file.filename,
           originalName: file.originalname,
           path: file.path,
@@ -216,7 +216,7 @@ const updateProduct = async (req, res, next) => {
       const hasExistingPrimary = product.images.some(img => img.isPrimary);
       req.files.forEach((file, index) => {
         product.images.push({
-          url: `/uploads/products/${file.filename}`,
+          url: file.path || file.secure_url,
           filename: file.filename,
           originalName: file.originalname,
           path: file.path,

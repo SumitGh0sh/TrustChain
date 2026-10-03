@@ -1,11 +1,1 @@
-{
-  "mcpServers": {
-    "chainstack": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@chainstack/mcp-server"
-      ]
-    }
-  }
-}
+{"mcpServers":{"chainstack":{"command":"npx","args":["-y","mcp-remote","https://mcp.chainstack.com/mcp"]}}}

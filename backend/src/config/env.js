@@ -24,6 +24,11 @@ const config = {
   pointsPerClaim: parseInt(process.env.POINTS_PER_CLAIM || '50', 10),
   cloneScanThreshold: parseInt(process.env.CLONE_SCAN_THRESHOLD || '50', 10),
   cloneWindowMinutes: parseInt(process.env.CLONE_WINDOW_MINUTES || '5', 10),
+  cloudinary: {
+    cloudName: process.env.CLOUDINARY_CLOUD_NAME,
+    apiKey: process.env.CLOUDINARY_API_KEY,
+    apiSecret: process.env.CLOUDINARY_API_SECRET,
+  },
 };
 
 module.exports = config;
