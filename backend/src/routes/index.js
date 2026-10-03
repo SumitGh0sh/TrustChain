@@ -16,6 +16,7 @@ const reportRoutes = require('./report.routes');
 const analyticsRoutes = require('./analytics.routes');
 const billingRoutes = require('./billing.routes');
 const settingsRoutes = require('./settings.routes');
+const zkpRoutes = require('./zkp.routes');
 
 const { sellUnit, claimUnit, getRetailSales } = require('../controllers/unit.controller');
 const { getHotspots } = require('../controllers/report.controller');
@@ -49,6 +50,7 @@ router.use('/reports', reportRoutes);
 router.use('/analytics', analyticsRoutes);
 router.use('/billing', billingRoutes);
 router.use('/settings', settingsRoutes);
+router.use('/zkp', zkpRoutes);
 
 // Manufacturer & Admin Hotspots shortcut: GET /api/v1/hotspots
 router.get(

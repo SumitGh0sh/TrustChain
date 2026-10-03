@@ -1068,6 +1068,28 @@ class ApiService {
         method: 'POST',
       });
     },
+  
+    };
+
+  generateZkProof = async (unitCode: string, secret?: string) => {
+    return this.request('/zkp/generate-proof', {
+      method: 'POST',
+      body: JSON.stringify({ unitCode, secret }),
+    });
+  };
+
+  verifyZkProof = async (proof: any, publicSignals: any, unitCode?: string) => {
+    return this.request('/zkp/verify-proof', {
+      method: 'POST',
+      body: JSON.stringify({ proof, publicSignals, unitCode }),
+    });
+  };
+
+  claimWarrantyZk = async (proof: any, publicSignals: any) => {
+    return this.request('/zkp/claim-warranty-zk', {
+      method: 'POST',
+      body: JSON.stringify({ proof, publicSignals }),
+    });
   };
 }
 

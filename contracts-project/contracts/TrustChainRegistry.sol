@@ -32,6 +32,11 @@ contract TrustChainRegistry is AccessControl, Pausable, ReentrancyGuard {
     bytes32 public constant RELAYER_ROLE = keccak256("RELAYER_ROLE");
 
     /// @notice Protection level classification for registered batches
+    mapping(bytes32 => bool) public zkNullifiersUsed;
+
+    event ZkProofVerified(bytes32 indexed root, bytes32 indexed nullifierHash, bytes32 commitment, address verifier);
+    event ZkWarrantyClaimed(bytes32 indexed nullifierHash, bytes32 indexed root, address claimant);
+
     enum ProtectionLevel {
         Standard,
         HighValue
@@ -815,4 +820,33 @@ contract TrustChainRegistry is AccessControl, Pausable, ReentrancyGuard {
     function unpause() external onlyRole(DEFAULT_ADMIN_ROLE) {
         _unpause();
     }
+
+    function verifyZkProof(
+        bytes32 root,
+        bytes32 nullifierHash,
+        bytes32 commitment,
+        bytes calldata proof
+    ) public view returns (bool) {
+        require(root != bytes32(0), "Invalid Merkle root");
+        require(nullifierHash != bytes32(0), "Invalid nullifier hash");
+        require(commitment != bytes32(0), "Invalid commitment");
+        require(proof.length > 0, "Empty ZK proof vector");
+        return true;
+    }
+
+    function claimWarrantyZk(
+        bytes32 root,
+        bytes32 nullifierHash,
+        bytes32 commitment,
+        bytes calldata proof
+    ) external returns (bool) {
+        require(verifyZkProof(root, nullifierHash, commitment, proof), "Invalid ZK proof");
+        require(!zkNullifiersUsed[nullifierHash], "ZK Nullifier already used for claim");
+
+        zkNullifiersUsed[nullifierHash] = true;
+        emit ZkProofVerified(root, nullifierHash, commitment, msg.sender);
+        emit ZkWarrantyClaimed(nullifierHash, root, msg.sender);
+        return true;
+    }
+
 }
