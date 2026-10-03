@@ -597,7 +597,7 @@ export const BatchesScreen: React.FC = () => {
             <div className="pt-2 space-y-2.5">
               <button
                 type="button"
-                onClick={() => handleDownloadPdf(createdSuccessBatch.id || createdSuccessBatch.batchNumber)}
+                onClick={() => handleDownloadPdf(createdSuccessBatch.batchNumber || createdSuccessBatch.id || createdSuccessBatch._id)}
                 className="w-full py-3 bg-black text-white text-xs font-medium rounded-full hover:bg-gray-800 transition-colors flex items-center justify-center gap-2 shadow-sm cursor-pointer"
               >
                 <Download className="w-4 h-4" />
@@ -606,7 +606,7 @@ export const BatchesScreen: React.FC = () => {
 
               <button
                 type="button"
-                onClick={() => handleDownloadZip(createdSuccessBatch.id || createdSuccessBatch.batchNumber)}
+                onClick={() => handleDownloadZip(createdSuccessBatch.batchNumber || createdSuccessBatch.id || createdSuccessBatch._id)}
                 className="w-full py-3 bg-[#F5F5F5] text-black text-xs font-medium rounded-full hover:bg-black/5 border border-black/10 transition-colors flex items-center justify-center gap-2 cursor-pointer"
               >
                 <FileText className="w-4 h-4" />
@@ -645,7 +645,7 @@ export const BatchesScreen: React.FC = () => {
             <div className="pt-2 space-y-2.5">
               <button
                 type="button"
-                onClick={() => handleDownloadPdf(selectedBatchForQr.id || selectedBatchForQr.batchNumber)}
+                onClick={() => handleDownloadPdf(selectedBatchForQr.batchNumber || selectedBatchForQr.id || selectedBatchForQr._id)}
                 className="w-full py-3 bg-black text-white text-xs font-medium rounded-full hover:bg-gray-800 transition-colors flex items-center justify-center gap-2 shadow-sm cursor-pointer"
               >
                 <Download className="w-4 h-4" />
@@ -654,7 +654,7 @@ export const BatchesScreen: React.FC = () => {
 
               <button
                 type="button"
-                onClick={() => handleDownloadZip(selectedBatchForQr.id || selectedBatchForQr.batchNumber)}
+                onClick={() => handleDownloadZip(selectedBatchForQr.batchNumber || selectedBatchForQr.id || selectedBatchForQr._id)}
                 className="w-full py-3 bg-[#F5F5F5] text-black text-xs font-medium rounded-full hover:bg-black/5 border border-black/10 transition-colors flex items-center justify-center gap-2 cursor-pointer"
               >
                 <FileText className="w-4 h-4" />

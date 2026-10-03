@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const crypto = require('crypto');
 const { ethers } = require('ethers');
 const Batch = require('../models/Batch');
@@ -15,6 +16,43 @@ const { ROLES } = require('../constants/roles');
  * @desc Create and register a product batch on-chain and off-chain
  * @route POST /api/v1/batches
  */
+
+/**
+ * Helper to query batch by batchNumber, batchId, or ObjectId
+ */
+const findBatchByIdentifier = async (batchId, populateFields = false) => {
+  if (!batchId) return null;
+  const cleanId = String(batchId).trim();
+  const query = {
+    $or: [
+      { batchNumber: cleanId },
+      { batchId: cleanId },
+    ],
+  };
+
+  if (mongoose.Types.ObjectId.isValid(cleanId)) {
+    query.$or.push({ _id: cleanId });
+  }
+
+  let q = Batch.findOne(query);
+  if (populateFields) {
+    q = q.populate('product', 'name category sku description price images')
+         .populate('brand', 'companyName status gst cin')
+         .populate('manufacturer', 'name companyName email walletAddress');
+  }
+  return await q;
+};
+
+/**
+ * Helper to check manufacturer or admin ownership authorization
+ */
+const isAuthorizedForBatch = (user, batch) => {
+  if (!user || !batch) return false;
+  if (user.role === ROLES.ADMIN) return true;
+  const mfgId = (batch.manufacturer?._id || batch.manufacturer)?.toString();
+  return mfgId === user._id.toString();
+};
+
 const createBatch = async (req, res, next) => {
   try {
     const {
@@ -353,29 +391,14 @@ const getBatchById = async (req, res, next) => {
   try {
     const { batchId } = req.params;
 
-    // Search by ObjectId, batchNumber, or batchId
-    const query = {
-      $or: [
-        { batchNumber: batchId },
-        { batchId: batchId },
-      ],
-    };
-
-    if (ethers.isHexString(batchId, 12)) {
-      query.$or.push({ _id: batchId });
-    }
-
-    const batch = await Batch.findOne(query)
-      .populate('product', 'name category sku description price images')
-      .populate('brand', 'companyName status gst cin')
-      .populate('manufacturer', 'name companyName email walletAddress');
+    const batch = await findBatchByIdentifier(batchId, true);
 
     if (!batch) {
       return errorResponse(res, `Batch "${batchId}" was not found.`, 404, 'BATCH_NOT_FOUND');
     }
 
     // Ownership check: manufacturer can only view their own batches
-    if (req.user.role !== ROLES.ADMIN && batch.manufacturer._id.toString() !== req.user._id.toString()) {
+    if (!isAuthorizedForBatch(req.user, batch)) {
       return errorResponse(res, 'You do not have permission to view this batch.', 403, 'FORBIDDEN');
     }
 
@@ -415,15 +438,13 @@ const recallBatch = async (req, res, next) => {
     const { batchId } = req.params;
     const { reason } = req.body;
 
-    const batch = await Batch.findOne({
-      $or: [{ batchNumber: batchId }, { batchId: batchId }],
-    });
+    const batch = await findBatchByIdentifier(batchId);
 
     if (!batch) {
       return errorResponse(res, `Batch "${batchId}" was not found.`, 404, 'BATCH_NOT_FOUND');
     }
 
-    if (req.user.role !== ROLES.ADMIN && batch.manufacturer.toString() !== req.user._id.toString()) {
+    if (!isAuthorizedForBatch(req.user, batch)) {
       return errorResponse(res, 'Not authorized to recall this batch.', 403, 'FORBIDDEN');
     }
 
@@ -600,21 +621,13 @@ const downloadBatchQrZip = async (req, res, next) => {
   try {
     const { batchId } = req.params;
 
-    const query = {
-      $or: [{ batchNumber: batchId }, { batchId: batchId }],
-    };
-
-    if (ethers.isHexString(batchId, 12)) {
-      query.$or.push({ _id: batchId });
-    }
-
-    const batch = await Batch.findOne(query);
+    const batch = await findBatchByIdentifier(batchId);
     if (!batch) {
       return errorResponse(res, `Batch "${batchId}" was not found.`, 404, 'BATCH_NOT_FOUND');
     }
 
     // Ownership check: only the owning manufacturer or admin can download
-    if (req.user.role !== ROLES.ADMIN && batch.manufacturer.toString() !== req.user._id.toString()) {
+    if (!isAuthorizedForBatch(req.user, batch)) {
       return errorResponse(
         res,
         'Access denied: You can only download QR codes for batches created by your organization.',
@@ -638,21 +651,13 @@ const downloadBatchQrPdf = async (req, res, next) => {
   try {
     const { batchId } = req.params;
 
-    const query = {
-      $or: [{ batchNumber: batchId }, { batchId: batchId }],
-    };
-
-    if (ethers.isHexString(batchId, 12)) {
-      query.$or.push({ _id: batchId });
-    }
-
-    const batch = await Batch.findOne(query);
+    const batch = await findBatchByIdentifier(batchId);
     if (!batch) {
       return errorResponse(res, `Batch "${batchId}" was not found.`, 404, 'BATCH_NOT_FOUND');
     }
 
     // Ownership check: only the owning manufacturer or admin can download
-    if (req.user.role !== ROLES.ADMIN && batch.manufacturer.toString() !== req.user._id.toString()) {
+    if (!isAuthorizedForBatch(req.user, batch)) {
       return errorResponse(
         res,
         'Access denied: You can only download QR sheets for batches created by your organization.',
