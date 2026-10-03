@@ -5,12 +5,17 @@ const { errorResponse } = require('../utils/response');
 
 const authenticate = async (req, res, next) => {
   try {
+    let token = null;
     const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return errorResponse(res, 'Authentication token missing or invalid.', 401, 'UNAUTHORIZED');
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      token = authHeader.split(' ')[1];
+    } else if (req.query && req.query.token) {
+      token = req.query.token;
     }
 
-    const token = authHeader.split(' ')[1];
+    if (!token) {
+      return errorResponse(res, 'Authentication token missing or invalid.', 401, 'UNAUTHORIZED');
+    }
     const decoded = jwt.verify(token, config.jwtSecret);
 
     const user = await User.findById(decoded.id);

@@ -163,16 +163,60 @@ export const BatchesScreen: React.FC = () => {
     }
   };
 
-  const handleDownloadPdf = (batchId: string) => {
-    const url = api.batches.getBatchQrPdfUrl(batchId);
-    window.open(url, '_blank');
-    toast.success('Downloading A4 Printable QR Code Sheet (PDF)...');
+  const handleDownloadPdf = async (batchId: string) => {
+    try {
+      toast.info('Preparing A4 Printable QR Code Sheet (PDF)...');
+      const token = localStorage.getItem('trustchain_token') || sessionStorage.getItem('trustchain_token');
+      const url = api.batches.getBatchQrPdfUrl(batchId);
+      const res = await fetch(url, {
+        headers: token ? { Authorization: 'Bearer ' + token } : {},
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error?.message || 'Failed to download QR PDF');
+      }
+      const blob = await res.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = batchId + '-qr-sheet.pdf';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(blobUrl);
+      toast.success('Downloaded A4 Printable QR Code Sheet (PDF)!');
+    } catch (err: any) {
+      console.error('PDF Download Error:', err);
+      toast.error(err.message || 'Failed to download PDF sheet.');
+    }
   };
 
-  const handleDownloadZip = (batchId: string) => {
-    const url = api.batches.getBatchQrZipUrl(batchId);
-    window.open(url, '_blank');
-    toast.success('Downloading Batch QR Codes Archive (ZIP of PNGs)...');
+  const handleDownloadZip = async (batchId: string) => {
+    try {
+      toast.info('Preparing Batch QR Codes Archive (ZIP of PNGs)...');
+      const token = localStorage.getItem('trustchain_token') || sessionStorage.getItem('trustchain_token');
+      const url = api.batches.getBatchQrZipUrl(batchId);
+      const res = await fetch(url, {
+        headers: token ? { Authorization: 'Bearer ' + token } : {},
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error?.message || 'Failed to download QR ZIP');
+      }
+      const blob = await res.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = batchId + '-qr-codes.zip';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(blobUrl);
+      toast.success('Downloaded Batch QR Codes Archive (ZIP of PNGs)!');
+    } catch (err: any) {
+      console.error('ZIP Download Error:', err);
+      toast.error(err.message || 'Failed to download ZIP archive.');
+    }
   };
 
   const closeModals = () => {
